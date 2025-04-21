@@ -12,4 +12,4 @@ const myPromise = new MyPromise<number>((resolve, reject) => {
 console.log({myPromise});
 
 
-myPromise.then(res => console.log(res));
+myPromise.then(res => console.log({res}));
