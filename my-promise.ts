@@ -23,7 +23,7 @@ export class MyPromise<TValue> {
         })
     }
 
-    then(callback: (value: TValue | void) => TValue | void): MyPromise<TValue | void> {
+    then<TSuceessValue>(callback: (value: TValue | void) => TSuceessValue | void): MyPromise<TSuceessValue | void> {
     
        return new MyPromise((resolve, reject) => {
             if (this.state === states.fullFilled)
