@@ -11,9 +11,9 @@ export class MyPromise<TValue> {
     private successCallback: (value: TValue) => TValue | void;
 
     private resolve(value: TValue) {
-        console.trace('resolve', value);
         this.state = states.fullFilled;
         this.value = value;
+        this.successCallback?.(value);
 
     }
 
@@ -23,12 +23,16 @@ export class MyPromise<TValue> {
         })
     }
 
-    then(callback: (value: TValue | void) => TValue): MyPromise<TValue> {
-       this.successCallback = callback;
-       
+    then(callback: (value: TValue | void) => TValue | void): MyPromise<TValue | void> {
+    
        return new MyPromise((resolve, reject) => {
-
-            resolve(callback(this.value) )
+            if (this.state === states.fullFilled)
+            {
+                resolve(callback(this.value) )
+            } else {
+                this.successCallback = value => resolve(callback(value));
+            }
+            
        })
     }
 
