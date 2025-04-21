@@ -6,6 +6,10 @@ const myPromise = new MyPromise<number>((resolve, reject) => {
         resolve(0);
     })
 
+
 });
+
+console.log({myPromise});
+
 
 myPromise.then(res => console.log(res));
