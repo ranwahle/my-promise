@@ -31,8 +31,8 @@ export class MyPromise<TValue> {
     
 
     then(scueesCallback: (value: TValue | void) => TValue | void,
-rejectCallback: (err: any) => any): MyPromise<TValue | void> {
-    
+rejectCallback?: (err: any) => any): MyPromise<TValue | void> {
+
        return new MyPromise((resolve, reject) => {
             if (this.state === states.fullFilled)
             {
