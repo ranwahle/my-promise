@@ -48,8 +48,22 @@ rejectCallback: (err: any) => any): MyPromise<TValue | void> {
        })
     }
 
-    static all<TValue>(promises: (Promise<TValue>)[]): Promise<TValue[]> {
-        throw Error('This was not fullfilled')
+    static all<TValue>(promises: (Promise<TValue>)[]): MyPromise<TValue[]> {
+        return new MyPromise<TValue[]>((resolve, reject)=> {
+            const result = [];
+
+            const callback = (value: TValue) => {
+                result.push(value);
+                if (result.length === promises.length) {
+                    resolve(result);
+                }
+            };
+
+            promises.forEach(p => p.then(callback));
+
+
+        })
+
 
     }
     

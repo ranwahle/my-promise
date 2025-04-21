@@ -19,3 +19,15 @@ const myPromise = new MyPromise<number>((resolve, reject) => {
 myPromise.then(res => {
     console.log({res, myPromise})
 }, err => console.log({err, myPromise}) );
+
+const promises = [];
+
+for (let i=0; i < 50; i++) {
+    promises.push(new MyPromise((res, rej) => {
+        setTimeout(() => res(i), 500);
+    }));
+}
+
+MyPromise.all(promises).then(values => {
+    console.log({values});
+})
