@@ -1,14 +1,14 @@
 import { MyPromise } from "./my-promise.ts";
 
 const myPromise = new MyPromise<number>((resolve, reject) => {
-    // setTimeout(() => {
-    //     console.log('Resolving...');
-    //     resolve(0);
-    // }, 1000)
     setTimeout(() => {
-        console.log('rejecting');
-        reject(`That's an error`);
-    })
+        console.log('Resolving...');
+        resolve(0);
+    }, 1000)
+    // setTimeout(() => {
+    //     console.log('rejecting');
+    //     reject(`That's an error`);
+    // })
 
 
 });
@@ -17,8 +17,9 @@ const myPromise = new MyPromise<number>((resolve, reject) => {
 
 
 myPromise.then(res => {
-    console.log({res, myPromise})
-}, err => console.log({err, myPromise}) );
+   return `The value returne was ${res}`
+}, err => console.log({err, myPromise}) )
+    .then(res => console.log(res));
 
 const promises = [];
 
