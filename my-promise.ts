@@ -5,15 +5,18 @@ const states = {
 
 }
 
+type PromiseCallback = (value: unknown) => unknown;
+
 export class MyPromise<TValue> {
     private state = states.pending;
     private value: TValue;
-    private successCallback: (value: TValue) => TValue | void;
+    private successCallback: PromiseCallback[] = [];
 
     private resolve(value: TValue) {
-        console.trace('resolve', value);
         this.state = states.fullFilled;
         this.value = value;
+        this.successCallback.forEach(cb => cb(value));
+        this.successCallback = [];
 
     }
 
@@ -23,12 +26,14 @@ export class MyPromise<TValue> {
         })
     }
 
-    then(callback: (value: TValue | void) => TValue): MyPromise<TValue> {
-       this.successCallback = callback;
+    then<TResult>(callback: (value: TValue) => TResult): MyPromise<TResult> {
+       
        
        return new MyPromise((resolve, reject) => {
-
-            resolve(callback(this.value) )
+            if (this.state === states.fullFilled) {
+                resolve(callback(this.value) )
+            }
+            this.successCallback.push(res =>  resolve(callback(this.value)));
        })
     }
 
