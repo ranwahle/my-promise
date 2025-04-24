@@ -21,6 +21,11 @@ myPromise.then(res => {
 }, err => console.log({err, myPromise}) )
     .then(res => console.log(res));
 
+    myPromise.then(res => {
+        return `The value returne was ${res}`
+     }, err => console.log({err, myPromise}) )
+         .then(res => console.log('2', res));
+     
 const promises = [];
 
 for (let i=0; i < 50; i++) {
