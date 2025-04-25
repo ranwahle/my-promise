@@ -24,6 +24,7 @@ myPromise.then(res => {
     myPromise.then(res => {
         return `The value returne was ${res}`
      }, err => console.log({err, myPromise}) )
+     .finally(() => console.log('finally...'))
          .then(res => console.log('2', res));
      
 const promises = [];

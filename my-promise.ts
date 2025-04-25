@@ -1,78 +1,49 @@
+type State = 'pending' | 'fullfilled' | 'rejected';
 
-type States = 'pending' | 'fulfilled' | 'rejected';
+type PromiseCallback = (value: unknown) => unknown;
 
+export class MyPromise<TResult, TError = void> {
+private state = 'pending';  
+    private value: TResult;
+    private error: TError;
+    private successCallback: PromiseCallback[] = [];   
+    private finallyCallbacks:PromiseCallback[] = [];
+    private rejectCallback: PromiseCallback[] = [];
 
-export class MyPromise<TValue> implements Promise<TValue> {
-    get [Symbol('PromiseState')]() {
-        return this.state;
-    }
-
-    private state: States = 'pending';
-    private value: TValue;
-    private successCallback: (value: TValue) => TValue | void;
-    private error: any;
-    private rejectCallback: (error: any) => any | void;
-    private onFinally: () => void;
-
-    toString() {
-        return `{${this.state}}`;
-    }
-
-    private resolve(value: TValue) {
-        this.state = 'fulfilled';
+    private resolve(value: TResult) {
+        this.state = 'fullfilled'
         this.value = value;
-        this.successCallback?.(value);
-        this.onFinally?.();
-  
+        this.successCallback.forEach(cb => cb(value));
+        this.successCallback = [];
+        this.finallyCallbacks.forEach(cb => cb(void 0));
+        this.finallyCallbacks = [];
+
     }
 
-    reject(error: any): void {
-        this.state = 'rejected';
-        this.error = error;
-        this.rejectCallback?.(error);
-        this.onFinally?.();
+    private reject(err: TError) {
+        this.state = 'fullfilled'
+        this.error = err;
+        this.rejectCallback.forEach(cb => cb(err));
+        this.successCallback = [];
+        this.finallyCallbacks.forEach(cb => cb(void 0));
+        this.finallyCallbacks = [];
     }
 
-    constructor(callback: (resolve: (value: TValue) => void, reject: (err: any) => void) => void) {
-        callback(value => this.resolve(value), (error) => this.reject(error));
+    constructor(callback: (resolve: (value: TResult) => void, reject: (err: TError) => void) => void) {
+        callback(value => this.resolve(value), err => this.reject(err));
     }
 
-    catch<TResult = never>(onrejected?: (reason: any) => TResult | PromiseLike<TResult>): Promise<TValue | TResult> {
-        return new MyPromise<TResult>((resolve, reject) => {
-            if (this.state === 'rejected') {
-                reject(onrejected?.(this.error))
-            } else {
-                this.rejectCallback = reason =>  reject(onrejected?.(reason));
-            }
-        })
-    }
-
-    finally(onfinally?: () => void): Promise<TValue> {
-        if (this.state !== 'pending') {
-            onfinally?.();
-        }
-        else {
-            this.onFinally = onfinally;
-        }
-        return this;
-    }
-    
-
-    then<TSucessValue>(scueesCallback: (value: TValue ) => TSucessValue,
-rejectCallback?: (err: any) => any): MyPromise<TSucessValue> {
-    
+    then<TCallbackResult, TCallbackError>(onFilfilled: (value: TResult) => TCallbackResult, onRejected?: (err: TError) => TCallbackError  ): MyPromise<TCallbackResult, TCallbackError> {
+       
+       
        return new MyPromise((resolve, reject) => {
-            if (this.state === 'fulfilled')
-            {
-                resolve(scueesCallback(this.value) )
+            if (this.state === 'fullfilled') {
+                resolve(onFilfilled(this.value) )
             } else if (this.state === 'rejected') {
-                reject(rejectCallback?.(this.error));
-            } 
-            else {
-                this.successCallback = value => resolve(scueesCallback(value));
-                this.rejectCallback = error => reject(rejectCallback?.(error));
+                reject(onRejected(this.error) )
             }
-            
+            this.successCallback.push(res =>  resolve(onFilfilled(this.value)));
+            this.rejectCallback.push(res =>  reject(onRejected(this.error)));
        })
     }
 
@@ -92,7 +63,16 @@ rejectCallback?: (err: any) => any): MyPromise<TSucessValue> {
 
         })
 
+    }
 
+    finally(onfinally?: () => void): MyPromise<TResult, TError> {
+        if (this.state !== 'pending') {
+            onfinally?.();
+        }
+        else {
+            this.finallyCallbacks.push(onfinally);
+        }
+        return this;
     }
     
 }
