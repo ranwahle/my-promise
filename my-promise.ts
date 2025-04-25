@@ -1,19 +1,14 @@
-const states = {
-    fullFilled: Symbol('fullfilled'),
-    rejected: Symbol('rejected'),
-    pending: Symbol('pending')
-
-}
+type State = 'pending' | 'fullfilled' | 'rejected';
 
 type PromiseCallback = (value: unknown) => unknown;
 
 export class MyPromise<TValue> {
-    private state = states.pending;
+    private state = 'pending';
     private value: TValue;
     private successCallback: PromiseCallback[] = [];
 
     private resolve(value: TValue) {
-        this.state = states.fullFilled;
+        this.state = 'fullfilled'
         this.value = value;
         this.successCallback.forEach(cb => cb(value));
         this.successCallback = [];
@@ -30,7 +25,7 @@ export class MyPromise<TValue> {
        
        
        return new MyPromise((resolve, reject) => {
-            if (this.state === states.fullFilled) {
+            if (this.state === 'fullfilled') {
                 resolve(callback(this.value) )
             }
             this.successCallback.push(res =>  resolve(callback(this.value)));
