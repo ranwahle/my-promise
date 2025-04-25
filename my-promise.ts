@@ -1,50 +1,45 @@
-const states = {
-    fullFilled: Symbol('fullfilled'),
-    rejected: Symbol('rejected'),
-    pending: Symbol('pending')
+type State = 'pending' | 'fullfilled' | 'rejected';
 
-}
+type PromiseCallback = (value: unknown) => unknown;
 
-export class MyPromise<TValue> {
-    private state = states.pending;
-    private value: TValue;
-    private successCallback: (value: TValue) => TValue | void;
-    private error: any;
-    private rejectCallback: (error: any) => any | void;
+export class MyPromise<TResult, TError = void> {
+private state = 'pending';  
+    private value: TResult;
+    private error: TError;
+    private successCallback: PromiseCallback[] = [];
+    private rejectCallback: PromiseCallback[] = [];
 
-    private resolve(value: TValue) {
-        this.state = states.fullFilled;
+    private resolve(value: TResult) {
+        this.state = 'fullfilled'
         this.value = value;
-        this.successCallback?.(value);
-  
+        this.successCallback.forEach(cb => cb(value));
+        this.successCallback = [];
+
     }
 
-    reject(error: any): void {
-        this.state = states.rejected;
-        this.error = error;
-        this.rejectCallback?.(error);
+    private reject(err: TError) {
+        this.state = 'fullfilled'
+        this.error = err;
+        this.rejectCallback.forEach(cb => cb(err));
+        this.successCallback = [];
+
     }
 
-    constructor(callback: (resolve: (value: TValue) => void, reject: (err: any) => void) => void) {
-        callback(value => this.resolve(value), (error) => this.reject(error));
+    constructor(callback: (resolve: (value: TResult) => void, reject: (err: TError) => void) => void) {
+        callback(value => this.resolve(value), err => this.reject(err));
     }
-    
 
-    then(scueesCallback: (value: TValue | void) => TValue | void,
-rejectCallback?: (err: any) => any): MyPromise<TValue | void> {
-
+    then<TCallbackResult, TCallbackError>(onFilfilled: (value: TResult) => TCallbackResult, onRejected?: (err: TError) => TCallbackError  ): MyPromise<TCallbackResult, TCallbackError> {
+       
+       
        return new MyPromise((resolve, reject) => {
-            if (this.state === states.fullFilled)
-            {
-                resolve(scueesCallback(this.value) )
-            } else if (this.state === states.rejected) {
-                reject(rejectCallback?.(this.error));
-            } 
-            else {
-                this.successCallback = value => resolve(scueesCallback(value));
-                this.rejectCallback = error => reject(rejectCallback?.(error));
+            if (this.state === 'fullfilled') {
+                resolve(onFilfilled(this.value) )
+            } else if (this.state === 'rejected') {
+                reject(onRejected(this.error) )
             }
-            
+            this.successCallback.push(res =>  resolve(onFilfilled(this.value)));
+            this.rejectCallback.push(res =>  reject(onRejected(this.error)));
        })
     }
 

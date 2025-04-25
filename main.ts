@@ -1,6 +1,6 @@
 import { MyPromise } from "./my-promise.ts";
 
-const myPromise = new MyPromise<number>((resolve, reject) => {
+const myPromise = new MyPromise<number, string>((resolve, reject) => {
     // setTimeout(() => {
     //     console.log('Resolving...');
     //     resolve(0);
