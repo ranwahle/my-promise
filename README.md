@@ -8,4 +8,4 @@ Each branch has a number previxed to it, and you may browse through the brnahces
 
 ## How to run
 * Use node 23, we do so because we're using an exerimental flag to run typescript. 
-* Run the code by `npm start`, 
+* Run the code by `npm start`
